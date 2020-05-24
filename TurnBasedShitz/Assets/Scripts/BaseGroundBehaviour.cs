@@ -7,23 +7,42 @@ public class BaseGroundBehaviour : MonoBehaviour
 {
     public Material grassyMaterial;
     public Material selectedMaterial;
+    public Material waterMaterial;
 
     public BaseTileModel myData;
 
     public void SendData(BaseTileModel data)
     {
         myData = data;
+        UpdateMaterial();
+    }
+
+    private void UpdateMaterial()
+    {
+        if(myData != null)
+        {
+            switch(myData.tileType)
+            {
+                case TileType.Grass:
+                    this.GetComponent<MeshRenderer>().material = grassyMaterial;
+                    break;
+                case TileType.Water:
+                    this.GetComponent<MeshRenderer>().material = waterMaterial;
+                    this.gameObject.transform.position = new Vector3(this.gameObject.transform.position.x, -0.4f, this.gameObject.transform.position.z);
+                    break;
+            }
+        }
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        this.GetComponent<MeshRenderer>().material = grassyMaterial;
+       
     }
 
     public void Unselect()
     {
-        this.GetComponent<MeshRenderer>().material = grassyMaterial;
+        UpdateMaterial();
     }
 
     public void Select()

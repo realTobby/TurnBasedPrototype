@@ -13,6 +13,8 @@ public class GameBoardGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        System.Random rnd = new System.Random();
+
         // width
         // length
         int width = 25;
@@ -23,7 +25,13 @@ public class GameBoardGenerator : MonoBehaviour
             for (int x = -(width / 2); x < width; x++)
             {
                 Vector3 pos = new Vector3(x, -1, y);
-                CreateTileAt(pos, TileType.Grass, true);
+
+                int rand = rnd.Next(0, 100);
+
+                if(rand >= 80)
+                    CreateTileAt(pos, TileType.Water, true);
+                else
+                    CreateTileAt(pos, TileType.Grass, true);
                 
             }
         }
@@ -110,7 +118,7 @@ public class GameBoardGenerator : MonoBehaviour
 
     public BaseTileModel GetTileAt(Vector3 pos)
     {
-        return usedTiles.Where(item => item.tilePosition.x == pos.x && item.tilePosition.z == pos.z && item.isWalkable == true).FirstOrDefault();
+        return usedTiles.Where(item => item.tilePosition.x == pos.x && item.tilePosition.z == pos.z).FirstOrDefault();
     }
 
     public void UnhideTileAt(Vector3 pos)
