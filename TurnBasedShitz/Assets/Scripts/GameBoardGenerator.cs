@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameBoardGenerator : MonoBehaviour
 {
+    public List<BaseTileModel> usedTiles = new List<BaseTileModel>();
+
     public GameObject basePrefab;
 
     // Start is called before the first frame update
@@ -50,26 +53,26 @@ public class GameBoardGenerator : MonoBehaviour
     {
         // left
         Vector3 left = new Vector3(positionCenter.x-1,positionCenter.y, positionCenter.z);
-        if (this.GetComponent<GlobalVariableHolder>().IsPositionAvailable(left))
+        if (IsPositionAvailable(left))
             UnhideTileAt(left);
         // up
         Vector3 up = new Vector3(positionCenter.x, positionCenter.y, positionCenter.z+1);
-        if (this.GetComponent<GlobalVariableHolder>().IsPositionAvailable(up))
+        if (IsPositionAvailable(up))
             UnhideTileAt(up);
         // right
         Vector3 right = new Vector3(positionCenter.x+1, positionCenter.y, positionCenter.z);
-        if (this.GetComponent<GlobalVariableHolder>().IsPositionAvailable(right))
+        if (IsPositionAvailable(right))
             UnhideTileAt(right);
         // down
         Vector3 down = new Vector3(positionCenter.x, positionCenter.y, positionCenter.z-1);
-        if (this.GetComponent<GlobalVariableHolder>().IsPositionAvailable(down))
+        if (IsPositionAvailable(down))
             UnhideTileAt(down);
     }
 
     private void CreateTileAt(Vector3 pos, TileType tileType, bool isHidden)
     {
         BaseTileModel btm = new BaseTileModel(pos, tileType, isHidden);
-        this.GetComponent<GlobalVariableHolder>().AddNewTile(btm);
+        AddNewTile(btm);
         if (isHidden == false)
         {
             CreateTileAt(btm.tilePosition);
@@ -78,7 +81,7 @@ public class GameBoardGenerator : MonoBehaviour
 
     private void CreateTileAt(Vector3 pos)
     {
-        BaseTileModel tile = this.GetComponent<GlobalVariableHolder>().GetTileAt(pos);
+        BaseTileModel tile = GetTileAt(pos);
         var newTile = Instantiate(basePrefab, pos, Quaternion.identity);
         newTile.GetComponent<BaseGroundBehaviour>().SendData(tile);
         newTile.transform.parent = this.gameObject.transform;
@@ -90,10 +93,29 @@ public class GameBoardGenerator : MonoBehaviour
     {
     }
 
-    private void UnhideTileAt(Vector3 pos)
+    public void AddNewTile(BaseTileModel tile)
     {
-        this.GetComponent<GlobalVariableHolder>().UnhideTileAt(pos);
-        CreateTileAt(pos);
+        usedTiles.Add(tile);
+    }
 
+    public List<BaseTileModel> GetGameBoard()
+    {
+        return usedTiles;
+    }
+
+    public bool IsPositionAvailable(Vector3 posInQuestion)
+    {
+        return usedTiles.Exists(x => x.tilePosition == posInQuestion && x.IsHidden == true);
+    }
+
+    public BaseTileModel GetTileAt(Vector3 pos)
+    {
+        return usedTiles.Where(item => item.tilePosition.x == pos.x && item.tilePosition.z == pos.z && item.isWalkable == true).FirstOrDefault();
+    }
+
+    public void UnhideTileAt(Vector3 pos)
+    {
+        usedTiles.Where(x => x.tilePosition == pos).FirstOrDefault().IsHidden = false;
+        CreateTileAt(pos);
     }
 }

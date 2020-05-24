@@ -107,6 +107,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 766b2439e388814408fe83b40dca9358, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  grassyMaterial: {fileID: 2100000, guid: 16b72004852950149b8487b0b938ac58, type: 2}
+  selectedMaterial: {fileID: 2100000, guid: efd8a228c455ffe42a64710cbe62cb3c, type: 2}
 --- !u!95 &2199712665768182336
 Animator:
   serializedVersion: 3

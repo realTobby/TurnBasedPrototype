@@ -6,7 +6,7 @@ using System.Linq;
 
 public class Pathfinder
 {
-    private GlobalVariableHolder _refGVH;
+    private List<BaseTileModel> currentGameBoard = new List<BaseTileModel>();
 
     private const int MOVE_STRAIGHT_COST = 10;
 
@@ -14,54 +14,53 @@ public class Pathfinder
     private List<BaseTileModel> closedList = new List<BaseTileModel>();
 
 
-    public List<BaseTileModel> FindPath(GlobalVariableHolder refGVH, Vector3 startPos, Vector3 endPos)
+    public List<BaseTileModel> FindPath(List<BaseTileModel> gameBoard, Vector3 startPos, Vector3 endPos)
     {
-        _refGVH = refGVH;
+        currentGameBoard = gameBoard;
 
-        List<BaseTileModel> currentTiles = _refGVH.GetGameBoard();
-
-        BaseTileModel startNode = _refGVH.GetTileAt(startPos);
-        BaseTileModel endNode = _refGVH.GetTileAt(endPos);
-
-
+        BaseTileModel startNode = GetTileAt(startPos);
+        BaseTileModel endNode = GetTileAt(endPos);
         openList.Add(startNode);
 
-        for(int i = 0; i < currentTiles.Count; i++)
+        for(int i = 0; i < currentGameBoard.Count; i++)
         {
-            BaseTileModel tile = currentTiles[i];
+            BaseTileModel tile = currentGameBoard[i];
             tile.gCost = int.MaxValue;
             tile.parentTile = null;
         }
 
-        startNode.gCost = 0;
-        startNode.hCost = CalculateDistanceCost(startNode, endNode);
-
-        while(openList.Count > 0)
+        if (startNode != null)
         {
-            BaseTileModel currentNode = GetLowestFCostTile(openList);
+            startNode.gCost = 0;
+            startNode.hCost = CalculateDistanceCost(startNode, endNode);
 
-            if(currentNode == endNode)
+            while (openList.Count > 0)
             {
-                return CalculatePath(endNode);
-            }
+                BaseTileModel currentNode = GetLowestFCostTile(openList);
 
-            openList.Remove(currentNode);
-            closedList.Add(currentNode);
-
-            foreach(BaseTileModel neighbourNode in GetNeighbours(currentNode))
-            {
-                if (closedList.Contains(neighbourNode)) continue;
-
-                int tGCost = currentNode.gCost + CalculateDistanceCost(currentNode, neighbourNode);
-                if(tGCost < neighbourNode.gCost)
+                if (currentNode == endNode)
                 {
-                    neighbourNode.parentTile = currentNode;
-                    neighbourNode.gCost = tGCost;
-                    neighbourNode.hCost = CalculateDistanceCost(neighbourNode, endNode);
+                    return CalculatePath(endNode);
+                }
 
-                    if(!openList.Contains(neighbourNode))
+                openList.Remove(currentNode);
+                closedList.Add(currentNode);
+
+                foreach (BaseTileModel neighbourNode in GetNeighbours(currentNode))
+                {
+                    if (closedList.Contains(neighbourNode)) continue;
+
+                    int tGCost = currentNode.gCost + CalculateDistanceCost(currentNode, neighbourNode);
+                    if (tGCost < neighbourNode.gCost)
                     {
-                        openList.Add(neighbourNode);
+                        neighbourNode.parentTile = currentNode;
+                        neighbourNode.gCost = tGCost;
+                        neighbourNode.hCost = CalculateDistanceCost(neighbourNode, endNode);
+
+                        if (!openList.Contains(neighbourNode))
+                        {
+                            openList.Add(neighbourNode);
+                        }
                     }
                 }
             }
@@ -69,13 +68,17 @@ public class Pathfinder
         return null;
     }
 
+    private BaseTileModel GetTileAt(Vector3 pos)
+    {
+        return currentGameBoard.Where(tile => tile.tilePosition.x == pos.x && tile.tilePosition.z == pos.z && tile.isWalkable == true).FirstOrDefault();
+    }
 
     private List<BaseTileModel> GetNeighbours(BaseTileModel node)
     {
         List<BaseTileModel> neighbours = new List<BaseTileModel>();
 
         Vector3 leftPos = new Vector3(node.tilePosition.x - 1, node.tilePosition.y, node.tilePosition.z);
-        BaseTileModel leftTile = _refGVH.GetTileAt(leftPos);
+        BaseTileModel leftTile = GetTileAt(leftPos);
         if(leftTile != null)
         {
             if (leftTile.IsHidden == false && leftTile.isWalkable == true)
@@ -83,7 +86,7 @@ public class Pathfinder
         }
         
         Vector3 rightPos = new Vector3(node.tilePosition.x + 1, node.tilePosition.y, node.tilePosition.z);
-        BaseTileModel rightTile = _refGVH.GetTileAt(rightPos);
+        BaseTileModel rightTile = GetTileAt(rightPos);
         if(rightTile != null)
         {
             if (rightTile.IsHidden == false && rightTile.isWalkable == true)
@@ -91,7 +94,7 @@ public class Pathfinder
         }
         
         Vector3 upPos = new Vector3(node.tilePosition.x, node.tilePosition.y, node.tilePosition.z + 1);
-        BaseTileModel upTile = _refGVH.GetTileAt(upPos);
+        BaseTileModel upTile = GetTileAt(upPos);
         if(upTile != null)
         {
             if (upTile.IsHidden == false && upTile.isWalkable == true)
@@ -100,7 +103,7 @@ public class Pathfinder
         
 
         Vector3 downPos = new Vector3(node.tilePosition.x, node.tilePosition.y, node.tilePosition.z - 1);
-        BaseTileModel downTile = _refGVH.GetTileAt(downPos);
+        BaseTileModel downTile = GetTileAt(downPos);
         if(downTile != null)
         {
             if (downTile.IsHidden == false && downTile.isWalkable == true)
