@@ -11,6 +11,8 @@ public class BaseGroundBehaviour : MonoBehaviour
 
     public BaseTileModel myData;
 
+    public bool isSelected = false;
+
     public void SendData(BaseTileModel data)
     {
         myData = data;
@@ -35,18 +37,21 @@ public class BaseGroundBehaviour : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Update()
     {
-       
+        if(myData != null && isSelected == false)
+            UpdateMaterial();
     }
 
     public void Unselect()
     {
         UpdateMaterial();
+        isSelected = false;
     }
 
     public void Select()
     {
+        isSelected = true;
         this.GetComponent<MeshRenderer>().material = selectedMaterial;
     }
 }

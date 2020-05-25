@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class GameBoardGenerator : MonoBehaviour
 {
@@ -13,66 +14,87 @@ public class GameBoardGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        System.Random rnd = new System.Random();
+        CalcNoise();
 
-        // width
-        // length
-        int width = 25;
-        int height = 25;
+        int middleX = 25 / 2;
+        int middleZ = 25 / 2;
 
-        for(int y = -(height/2); y < height; y++)
+
+
+        // unhide first tiles ==> in the middle
+        for (int z = middleZ - 1; z < middleZ+2; z++)
         {
-            for (int x = -(width / 2); x < width; x++)
+            for (int x = middleX - 1; x < middleX+2; x++)
             {
-                Vector3 pos = new Vector3(x, -1, y);
-
-                int rand = rnd.Next(0, 100);
-
-                if(rand >= 80)
-                    CreateTileAt(pos, TileType.Water, true);
-                else
-                    CreateTileAt(pos, TileType.Grass, true);
-                
-            }
-        }
-
-        // unhide first tiles
-        for (int y = -1; y < 2; y++)
-        {
-            for (int x = -1; x < 2; x++)
-            {
-                Vector3 pos = new Vector3(x, -1, y);
+                Vector3 pos = new Vector3(x, -0.2F, z);
                 UnhideTileAt(pos);
             }
         }
 
-        Vector3 pos1 = new Vector3(-2, -1, 0);
-        UnhideTileAt(pos1);
-        Vector3 pos2 = new Vector3(0, -1, -2);
-        UnhideTileAt(pos2);
-        Vector3 pos3 = new Vector3(2, -1, 0);
-        UnhideTileAt(pos3);
-        Vector3 pos4 = new Vector3(0, -1, 2);
-        UnhideTileAt(pos4);
+        //Vector3 pos1 = new Vector3(-2, -1, 0);
+        //UnhideTileAt(pos1);
+        //Vector3 pos2 = new Vector3(0, -1, -2);
+        //UnhideTileAt(pos2);
+        //Vector3 pos3 = new Vector3(2, -1, 0);
+        //UnhideTileAt(pos3);
+        //Vector3 pos4 = new Vector3(0, -1, 2);
+        //UnhideTileAt(pos4);
 
     }
+
+
+    void CalcNoise()
+    {
+        System.Random rnd = new System.Random();
+
+        var randomSeed = rnd.Next(0, 10000);
+
+        float scale = 6F;
+
+        int width = 25;
+        int height = 25;
+
+        float xOrg = 0F;
+        float yOrg = 0F;
+
+        float y = 0.0F;
+
+        while (y < height)
+        {
+            float x = 0.0F;
+            while (x < width)
+            {
+                float xCoord = (xOrg + x  / width)  * scale;
+                float yCoord = (yOrg + y  / height)  * scale;
+                float sample = Mathf.PerlinNoise(xCoord + randomSeed, yCoord + randomSeed);
+                Vector3 pos = new Vector3(x, 0, y);
+                if (sample <= 0.35)
+                    CreateTileAt(pos, TileType.Water, false);
+                else
+                    CreateTileAt(pos, TileType.Grass, false);
+                x++;
+            }
+            y++;
+        }
+    }
+
 
     public void GenerateNextTiles(Vector3 positionCenter)
     {
         // left
-        Vector3 left = new Vector3(positionCenter.x-1,positionCenter.y, positionCenter.z);
+        Vector3 left = new Vector3(positionCenter.x-1,-0.2F, positionCenter.z);
         if (IsPositionAvailable(left))
             UnhideTileAt(left);
         // up
-        Vector3 up = new Vector3(positionCenter.x, positionCenter.y, positionCenter.z+1);
+        Vector3 up = new Vector3(positionCenter.x, -0.2F, positionCenter.z+1);
         if (IsPositionAvailable(up))
             UnhideTileAt(up);
         // right
-        Vector3 right = new Vector3(positionCenter.x+1, positionCenter.y, positionCenter.z);
+        Vector3 right = new Vector3(positionCenter.x+1, -0.2F, positionCenter.z);
         if (IsPositionAvailable(right))
             UnhideTileAt(right);
         // down
-        Vector3 down = new Vector3(positionCenter.x, positionCenter.y, positionCenter.z-1);
+        Vector3 down = new Vector3(positionCenter.x, -0.2F, positionCenter.z-1);
         if (IsPositionAvailable(down))
             UnhideTileAt(down);
     }
@@ -113,7 +135,7 @@ public class GameBoardGenerator : MonoBehaviour
 
     public bool IsPositionAvailable(Vector3 posInQuestion)
     {
-        return usedTiles.Exists(x => x.tilePosition == posInQuestion && x.IsHidden == true);
+        return usedTiles.Exists(item => item.tilePosition.x == posInQuestion.x && item.tilePosition.z == posInQuestion.z && item.IsHidden == true);
     }
 
     public BaseTileModel GetTileAt(Vector3 pos)
@@ -123,7 +145,12 @@ public class GameBoardGenerator : MonoBehaviour
 
     public void UnhideTileAt(Vector3 pos)
     {
-        usedTiles.Where(x => x.tilePosition == pos).FirstOrDefault().IsHidden = false;
+        usedTiles.Where(item => item.tilePosition.x == pos.x && item.tilePosition.z == pos.z).FirstOrDefault().IsHidden = false;
         CreateTileAt(pos);
+    }
+
+    public void UnselectTileAt(Vector3 pos)
+    {
+        // TODO: unselect tile the player already walked on!
     }
 }
