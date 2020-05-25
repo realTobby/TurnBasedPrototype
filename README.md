@@ -1,2 +1,2 @@
 # TurnBasedShitz
-![Banner](https://github.com/realTobby/TurnBasedShitz/blob/master/screen1.PNG)
+![Banner](https://github.com/realTobby/TurnBasedShitz/blob/master/screen2.PNG)
