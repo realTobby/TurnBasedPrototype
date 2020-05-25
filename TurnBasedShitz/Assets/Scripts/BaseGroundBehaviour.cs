@@ -30,7 +30,7 @@ public class BaseGroundBehaviour : MonoBehaviour
                     break;
                 case TileType.Water:
                     this.GetComponent<MeshRenderer>().material = waterMaterial;
-                    this.gameObject.transform.position = new Vector3(this.gameObject.transform.position.x, -0.4f, this.gameObject.transform.position.z);
+                    this.gameObject.transform.position = new Vector3(this.gameObject.transform.position.x, 0.5f, this.gameObject.transform.position.z);
                     break;
             }
         }

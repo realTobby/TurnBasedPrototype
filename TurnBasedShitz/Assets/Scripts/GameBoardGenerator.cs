@@ -31,15 +31,6 @@ public class GameBoardGenerator : MonoBehaviour
             }
         }
 
-        //Vector3 pos1 = new Vector3(-2, -1, 0);
-        //UnhideTileAt(pos1);
-        //Vector3 pos2 = new Vector3(0, -1, -2);
-        //UnhideTileAt(pos2);
-        //Vector3 pos3 = new Vector3(2, -1, 0);
-        //UnhideTileAt(pos3);
-        //Vector3 pos4 = new Vector3(0, -1, 2);
-        //UnhideTileAt(pos4);
-
     }
 
 
@@ -69,9 +60,9 @@ public class GameBoardGenerator : MonoBehaviour
                 float sample = Mathf.PerlinNoise(xCoord + randomSeed, yCoord + randomSeed);
                 Vector3 pos = new Vector3(x, 0, y);
                 if (sample <= 0.35)
-                    CreateTileAt(pos, TileType.Water, false);
+                    CreateTileAt(pos, TileType.Water, true);
                 else
-                    CreateTileAt(pos, TileType.Grass, false);
+                    CreateTileAt(pos, TileType.Grass, true);
                 x++;
             }
             y++;
