@@ -5,16 +5,33 @@ using System.Linq;
 
 public class BaseGroundBehaviour : MonoBehaviour
 {
-    public Material grassyMaterial;
-    public Material selectedMaterial;
-    public Material waterMaterial;
+    private Material grassyMaterial;
+    private Material selectedMaterial;
+    private Material waterMaterial;
 
     public BaseTileModel myData;
 
     public bool isSelected = false;
 
+    public void Start()
+    {
+        
+    }
+
+    public void CollectItem()
+    {
+        myData.item = null;
+        // todo inventory stuff
+        Destroy(this.gameObject.transform.GetChild(0).gameObject);
+    }
+
+
     public void SendData(BaseTileModel data)
     {
+        grassyMaterial = Resources.Load<Material>("Materials/grassyMaterial") as Material;
+        selectedMaterial = Resources.Load<Material>("Materials/selectedMaterial") as Material;
+        waterMaterial = Resources.Load<Material>("Materials/waterMaterial") as Material;
+
         myData = data;
         UpdateMaterial();
     }

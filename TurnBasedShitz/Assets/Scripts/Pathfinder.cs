@@ -81,7 +81,7 @@ public class Pathfinder
         BaseTileModel leftTile = GetTileAt(leftPos);
         if(leftTile != null)
         {
-            if (leftTile.IsHidden == false && leftTile.isWalkable == true)
+            if (leftTile.isWalkable == true)
                 neighbours.Add(leftTile);
         }
         
@@ -89,7 +89,7 @@ public class Pathfinder
         BaseTileModel rightTile = GetTileAt(rightPos);
         if(rightTile != null)
         {
-            if (rightTile.IsHidden == false && rightTile.isWalkable == true)
+            if ( rightTile.isWalkable == true)
                 neighbours.Add(rightTile);
         }
         
@@ -97,7 +97,7 @@ public class Pathfinder
         BaseTileModel upTile = GetTileAt(upPos);
         if(upTile != null)
         {
-            if (upTile.IsHidden == false && upTile.isWalkable == true)
+            if (upTile.isWalkable == true)
                 neighbours.Add(upTile);
         }
         
@@ -106,7 +106,7 @@ public class Pathfinder
         BaseTileModel downTile = GetTileAt(downPos);
         if(downTile != null)
         {
-            if (downTile.IsHidden == false && downTile.isWalkable == true)
+            if (downTile.isWalkable == true)
                 neighbours.Add(downTile);
         }
         

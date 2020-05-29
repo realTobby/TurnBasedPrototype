@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.Scripts;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,6 +15,8 @@ public enum TileType
 
 public class BaseTileModel
 {
+    public ItemModel item { get; set; } = null;
+
     public int gCost { get; set; }
     public int hCost { get; set; }
     public int fCost { get { return gCost + hCost; } }
@@ -52,6 +55,11 @@ public class BaseTileModel
     public override string ToString()
     {
         return "X: " + tilePosition.x + " Y: " + tilePosition.y + " Z: " + tilePosition.z;
+    }
+
+    public void SetItem(ItemModel item)
+    {
+        this.item = item;
     }
 
 }

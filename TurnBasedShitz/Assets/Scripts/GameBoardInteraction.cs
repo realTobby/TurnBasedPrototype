@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class GameBoardInteraction : MonoBehaviour
@@ -8,7 +9,7 @@ public class GameBoardInteraction : MonoBehaviour
     public GameObject playerReference;
     private float Timer;
     private GameObject lastMouseOver;
-    private List<BaseTileModel> currentPath = new List<BaseTileModel>();
+    public List<BaseTileModel> currentPath = new List<BaseTileModel>();
     private int pathIndex = 0;
     private Vector3 nextPosition;
     private bool isPlayerMoving = false;
@@ -36,14 +37,23 @@ public class GameBoardInteraction : MonoBehaviour
                 {
                     isPlayerMoving = false;
                     pathIndex = 0;
-                    this.GetComponent<GameBoardGenerator>().GenerateNextTiles(new Vector3(lastMouseOver.transform.position.x, -1, lastMouseOver.transform.position.z));
-                    UnselectTiles();
+                    // END OF MOVING
                 }
                 else
                 {
                     Timer = 0;
                     pathIndex++;
                     nextPosition = GetPlayerEquivalent(currentPath[pathIndex].tilePosition);
+                    this.GetComponent<GameBoardGenerator>().GenerateNextTiles(nextPosition);
+                    this.GetComponent<GameBoardGenerator>().UnselectTileAt(currentPath[pathIndex-1].tilePosition);
+
+                    GameObject currentTile = this.GetComponent<GameBoardGenerator>().GetBaseTileAt(nextPosition);
+                    if(currentTile.GetComponent<BaseGroundBehaviour>().myData.item != null)
+                    {
+                        currentTile.GetComponent<BaseGroundBehaviour>().CollectItem();
+                    }
+
+
                 }
             }
         }
@@ -67,27 +77,19 @@ public class GameBoardInteraction : MonoBehaviour
                         }
                         else
                         {
-                            if(hit.transform.gameObject.GetComponent<BaseGroundBehaviour>().myData.tileType != TileType.Water)
+                            if(hit.transform.gameObject.GetComponent<BaseGroundBehaviour>().myData != null)
                             {
-                                lastMouseOver = hit.transform.gameObject;
-                                lastMouseOver.GetComponent<BaseGroundBehaviour>().Select();
-                                UnselectTiles();
-                                Pathfinder pf = new Pathfinder();
-                                currentPath = pf.FindPath(this.gameObject.GetComponent<GameBoardGenerator>().GetGameBoard(), playerReference.transform.position, lastMouseOver.transform.position);
-                                int childCount = 0;
-                                childCount = this.gameObject.transform.childCount;
-                                if (currentPath != null)
+                                if (hit.transform.gameObject.GetComponent<BaseGroundBehaviour>().myData.tileType != TileType.Water)
                                 {
-                                    foreach (BaseTileModel segment in currentPath)
+                                    lastMouseOver = hit.transform.gameObject;
+                                    lastMouseOver.GetComponent<BaseGroundBehaviour>().Select();
+                                    this.GetComponent<GameBoardGenerator>().UnselectAllTiles();
+                                    Pathfinder pf = new Pathfinder();
+                                    currentPath = pf.FindPath(this.gameObject.GetComponent<GameBoardGenerator>().GetGameBoard(), playerReference.transform.position, lastMouseOver.transform.position);
+                                    
+                                    if (currentPath != null)
                                     {
-                                        for (int i = 0; i < childCount; i++)
-                                        {
-                                            BaseTileModel segmentTile = this.gameObject.transform.GetChild(i).GetComponent<BaseGroundBehaviour>().myData;
-                                            if (segmentTile.tilePosition == segment.tilePosition)
-                                            {
-                                                this.gameObject.transform.GetChild(i).GetComponent<BaseGroundBehaviour>().Select();
-                                            }
-                                        }
+                                        this.GetComponent<GameBoardGenerator>().SelectPath();
                                     }
                                 }
                             }
@@ -119,6 +121,7 @@ public class GameBoardInteraction : MonoBehaviour
                         {
                             pathIndex = 0;
                             nextPosition = GetPlayerEquivalent(currentPath[pathIndex].tilePosition);
+                            this.GetComponent<GameBoardGenerator>().UnselectTileAt(nextPosition);
                             isPlayerMoving = true;
                         }
                     }
@@ -134,25 +137,14 @@ public class GameBoardInteraction : MonoBehaviour
         return Vector3.Distance(currentPos, targetPos) <= t ? targetPos : Vector3.Lerp(currentPos, targetPos, t);
     }
 
-    private void UnselectTiles()
-    {
-        if(currentPath != null)
-        {
-            currentPath.Clear();
-            currentPath = new List<BaseTileModel>();
-        }
-        
-        int childCount = 0;
-        childCount = this.gameObject.transform.childCount;
-        for (int i = 0; i < childCount; i++)
-        {
-            this.gameObject.transform.GetChild(i).GetComponent<BaseGroundBehaviour>().Unselect();
-        }
-        
-    }
-
     private Vector3 GetPlayerEquivalent(Vector3 tile)
     {
         return new Vector3(tile.x, playerReference.transform.position.y, tile.z);
     }
+
+    public void SendPlayerToPos(Vector3 pos)
+    {
+        playerReference.transform.position = GetPlayerEquivalent(pos);
+    }
+
 }
